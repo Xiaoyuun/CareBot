@@ -22,8 +22,7 @@ successfully.
 
 ## Demo video
 
-Submission requirement: include a 3–5 minute video demonstrating the agents
-and the primary workflow. Add the published video link here before submitting.
+https://youtu.be/7T6OvEZlv9E?si=kdmvR6xqo3LwtaEz
 
 ## Fetch.ai, Agentverse, and ASI:One
 
