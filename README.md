@@ -67,8 +67,13 @@ in `carebot/protocols.py`.
   bases its assessment on the stored snapshot, not the free-form symptom text.
   It is a prototype, not a medical diagnostic system.
 - **ImageProcessingAgent and MonitoringAgent** run locally because they need
-  AWS access, and connect to CareBot through Agentverse Mailbox. CareBot and
-  ActionAgent can be hosted on Agentverse or run locally.
+  AWS access, and connect to CareBot through Agentverse Mailbox. Keep both
+  processes running on an AWS-configured machine while using their workflows.
+- **CareBot** and **ActionAgent** can run locally or be deployed to Agentverse.
+  The team has tested CareBot deployed through Agentverse and discovered in
+  ASI:One. If running CareBot locally, configure its ASI:One API key and make
+  sure the specialist addresses in `carebot/protocols.py` point to reachable
+  agents.
 
 The current prototype analyzes one image and returns a plan. Integrating a
 physical camera and robot to support the continuous
@@ -85,8 +90,23 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Configure credentials in the environment or in Agentverse secrets for hosted
-agents. Do not commit API keys, AWS credentials, or agent seeds.
+The dependency file includes the Fetch.ai `uagents` and `uagents-core`
+packages, the OpenAI-compatible ASI:One client, `python-dotenv`, and the AWS
+SDK packages used by this project.
+
+### Local and hosted configuration
+
+| Agent | Local setup | Hosted setup |
+|---|---|---|
+| CareBot | Run `python carebot/agent.py`; set `ASI_ONE_API_KEY` and configure reachable specialist addresses. | Deploy on Agentverse and configure `ASI_ONE_API_KEY` in the deployment's secrets/environment. |
+| ActionAgent | Run `python actionAgent/agent.py`. | Deploy on Agentverse. |
+| ImageProcessingAgent | Run `python ImageProcessingAgent/agent.py` on a machine with AWS access; set `IMAGE_AGENT_SEED`. Keep it running for requests. | In this prototype it runs locally via Agentverse Mailbox, not as an AWS-dependent hosted agent. |
+| MonitoringAgent | Run `python MonitoringAgentv2/agent.py` on a machine with AWS access; set `MONITORING_AGENT_SEED`. Keep it running for requests. | In this prototype it runs locally via Agentverse Mailbox, not as an AWS-dependent hosted agent. |
+
+Do not commit API keys, AWS credentials, or agent seeds. Set secrets through
+your local process environment (the local AWS-dependent agents also load an
+ignored `.env` file) or the hosted platform's secret configuration. Agent
+addresses are public identifiers, not credentials.
 
 ### External resources
 
@@ -115,7 +135,9 @@ that the AWS identity can read it. For monitoring, write one of the supported
 synthetic snapshots to S3 before testing a monitoring request; see
 `MonitoringAgentv2/mock_generator.py`.
 
-Run a local agent from the repository root:
+Run a local agent from the repository root (each command starts one agent;
+start only the agents needed for the chosen deployment, and keep local
+mailbox agents running):
 
 ```bash
 python carebot/agent.py
@@ -125,5 +147,5 @@ python MonitoringAgentv2/agent.py
 ```
 
 For multi-agent use, make sure CareBot's configured agent addresses point to
-the deployed specialist agents. The local AWS-dependent agents require their
+the active specialist agents. The local AWS-dependent agents require their
 seeds and AWS configuration before startup.
